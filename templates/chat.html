@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Live Secure Chat</title>
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+</head>
+<body>
+
+<h2>🔐 Live Secure Chat</h2>
+
+<input id="message" placeholder="Message"><br><br>
+
+<select id="algorithm">
+    <option value="AES">AES</option>
+    <option value="Caesar">Caesar</option>
+    <option value="Affine">Affine</option>
+</select><br><br>
+
+<input id="key" placeholder="Key"><br><br>
+
+<button onclick="sendMessage()">Send</button>
+
+<hr>
+
+<div id="chatBox"></div>
+
+<script>
+    var socket = io();
+
+    function sendMessage() {
+        let message = document.getElementById("message").value;
+        let algorithm = document.getElementById("algorithm").value;
+        let key = document.getElementById("key").value;
+
+        socket.emit("send_message", {
+            message: message,
+            algorithm: algorithm,
+            key: key
+        });
+    }
+
+    socket.on("receive_message", function(data) {
+        let box = document.getElementById("chatBox");
+
+        box.innerHTML += `
+            <p>
+                🔒 Cipher: ${data.cipher} <br>
+                🔓 Decrypted: ${data.result} <br>
+                📌 Algo: ${data.algorithm}
+            </p>
+            <hr>
+        `;
+    });
+</script>
+
+</body>
+</html>

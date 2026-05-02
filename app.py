@@ -1,60 +1,52 @@
-from flask import Flask, render_template, request
-from crypto import caesar, affine, aes, railfence, row_transposition, playfair
+from flask import Flask, render_template
+from flask_socketio import SocketIO, emit
+
+from crypto import caesar, affine, aes
 
 app = Flask(__name__)
+socketio = SocketIO(app)
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/")
 def home():
+    return render_template("index.html")
+
+@app.route("/chat")
+def chat():
+    return render_template("chat.html")
+
+# 🔥 REAL-TIME MESSAGE HANDLER
+@socketio.on("send_message")
+def handle_message(data):
+    message = data["message"]
+    algo = data["algorithm"]
+    key = data["key"]
+
     cipher = ""
     result = ""
-    error = ""
 
-    if request.method == "POST":
-        message = request.form.get("message", "")
-        algo = request.form.get("algorithm", "")
-        key = request.form.get("key", "")
+    try:
+        if algo == "Caesar":
+            shift = int(key)
+            cipher = caesar.encrypt(message, shift)
+            result = caesar.decrypt(cipher, shift)
 
-        try:
-            if algo == "Caesar":
-                shift = int(key)
-                cipher = caesar.encrypt(message, shift)
-                result = caesar.decrypt(cipher, shift)
+        elif algo == "Affine":
+            a, b = map(int, key.split(","))
+            cipher = affine.encrypt(message, a, b)
+            result = affine.decrypt(cipher, a, b)
 
-            elif algo == "Affine":
-                a, b = map(int, key.split(","))
-                cipher = affine.encrypt(message, a, b)
-                result = affine.decrypt(cipher, a, b)
+        elif algo == "AES":
+            cipher = aes.encrypt(message, key)
+            result = aes.decrypt(cipher, key)
 
-            elif algo == "AES":
-                cipher = aes.encrypt(message, key)
-                result = aes.decrypt(cipher, key)
+    except:
+        result = "❌ Error"
 
-            elif algo == "RailFence":
-                rails = int(key)
-                cipher = railfence.encrypt(message, rails)
-                result = railfence.decrypt(cipher, rails)
-
-            elif algo == "RowTransposition":
-                cipher = row_transposition.encrypt(message, key)
-                result = row_transposition.decrypt(cipher, key)
-
-            elif algo == "Playfair":
-                cipher = playfair.encrypt(message, key)
-                result = playfair.decrypt(cipher, key)
-
-            else:
-                error = "❌ Invalid Algorithm Selected"
-
-        except Exception as e:
-            error = f"❌ Error: {str(e)}"
-
-    return render_template(
-        "index.html",
-        cipher=cipher,
-        result=result,
-        error=error
-    )
-
+    emit("receive_message", {
+        "cipher": cipher,
+        "result": result,
+        "algorithm": algo
+    }, broadcast=True)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    socketio.run(app, debug=True)
