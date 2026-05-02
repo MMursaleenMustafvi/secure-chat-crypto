@@ -1,34 +1,55 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Secure Chat</title>
+    <title>Secure Chat Crypto</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 
-<h2>🔐 Secure Chat System</h2>
+<div class="container">
 
-<form method="POST">
-    <input type="text" name="message" placeholder="Enter message" required><br><br>
+    <h1>🔐 Secure Chat Crypto System</h1>
 
-    <select name="algorithm">
-        <option value="AES">AES</option>
-        <option value="Caesar">Caesar</option>
-        <option value="Affine">Affine</option>
-    </select><br><br>
+    <form method="POST">
 
-    <input type="text" name="key" placeholder="Key (e.g. 3 or 5,8)" required><br><br>
+        <label>Message:</label><br>
+        <input type="text" name="message" placeholder="Enter message" required><br><br>
 
-    <button type="submit">Encrypt & Decrypt</button>
-</form>
+        <label>Select Algorithm:</label><br>
+        <select name="algorithm" required>
+            <option value="">-- Select --</option>
+            <option value="AES">AES</option>
+            <option value="Caesar">Caesar Cipher</option>
+            <option value="Affine">Affine Cipher</option>
+            <option value="RailFence">Rail Fence</option>
+            <option value="RowTransposition">Row Transposition</option>
+            <option value="Playfair">Playfair Cipher</option>
+        </select><br><br>
 
-<hr>
+        <label>Key:</label><br>
+        <input type="text" name="key" placeholder="Examples: 3 | 5,8 | keyword" required><br><br>
 
-<h3>🔒 Cipher:</h3>
-<p>{{ cipher }}</p>
+        <button type="submit">Encrypt & Decrypt</button>
 
-<h3>🔓 Decrypted:</h3>
-<p>{{ result }}</p>
+    </form>
+
+    <hr>
+
+    {% if error %}
+        <p style="color:red;"><b>{{ error }}</b></p>
+    {% endif %}
+
+    {% if cipher %}
+        <h3>🔒 Cipher Text:</h3>
+        <div class="box">{{ cipher }}</div>
+    {% endif %}
+
+    {% if result %}
+        <h3>🔓 Decrypted Text:</h3>
+        <div class="box">{{ result }}</div>
+    {% endif %}
+
+</div>
 
 </body>
 </html>
