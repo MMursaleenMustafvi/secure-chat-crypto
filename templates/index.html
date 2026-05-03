@@ -1,28 +1,44 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Join Chat</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureChat PRO</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-
-<h2>🔐 Join Secure Chat</h2>
-
-<form action="/chat" method="POST">
-
-<input name="name" placeholder="Your Name" required><br><br>
-<input name="room" placeholder="Room ID" required><br><br>
-
-<select name="algo">
-    <option value="AES">AES</option>
-    <option value="Caesar">Caesar</option>
-    <option value="Affine">Affine</option>
-</select><br><br>
-
-<input name="key" placeholder="Key" required><br><br>
-
-<button type="submit">Join Chat</button>
-
-</form>
-
+    <div class="glass-panel login-container">
+        <i class="fas fa-fingerprint logo-icon"></i>
+        <h1>SecureChat PRO</h1>
+        <p>Military-Grade End-to-End Encryption</p>
+        
+        <form action="/chat" method="POST">
+            <div class="input-group">
+                <label>Call Sign (Name)</label>
+                <input type="text" name="name" class="custom-input" required autocomplete="off" placeholder="e.g. Neo">
+            </div>
+            <div class="input-group">
+                <label>Server Node (Room)</label>
+                <input type="text" name="room" class="custom-input" required autocomplete="off" placeholder="e.g. Matrix">
+            </div>
+            <div class="input-group">
+                <label>Protocol (Algorithm)</label>
+                <select name="algo" class="custom-input">
+                    <option value="AES">AES-128</option>
+                    <option value="Caesar">Caesar Cipher</option>
+                    <option value="Affine">Affine Cipher</option>
+                    <option value="RailFence">Rail Fence</option>
+                    <option value="RowTransposition">Row Transposition</option>
+                    <option value="Playfair">Playfair</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Decryption Key</label>
+                <input type="text" name="key" class="custom-input" required autocomplete="off" placeholder="Enter secret key">
+            </div>
+            <button type="submit" class="neon-btn"><i class="fas fa-terminal"></i> Initialize Connection</button>
+        </form>
+    </div>
 </body>
 </html>

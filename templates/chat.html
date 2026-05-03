@@ -1,106 +1,121 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Chat Room</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encrypted Session | SecureChat PRO</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
-
-    <style>
-        body { font-family: Arial; background: #ece5dd; }
-
-        .chat {
-            width: 400px;
-            margin: auto;
-            background: white;
-            height: 600px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .header {
-            background: #075e54;
-            color: white;
-            padding: 10px;
-        }
-
-        .messages {
-            flex: 1;
-            padding: 10px;
-            overflow-y: scroll;
-        }
-
-        .msg {
-            margin: 5px;
-            padding: 8px;
-            border-radius: 10px;
-            max-width: 70%;
-        }
-
-        .me { background: #dcf8c6; align-self: flex-end; }
-        .other { background: #fff; }
-
-        .input { display: flex; }
-        input { flex: 1; padding: 10px; }
-        button { padding: 10px; }
-    </style>
 </head>
-
 <body>
+    <div class="glass-panel chat-wrapper">
+        <div class="chat-header">
+            <div class="header-left">
+                <a href="/" class="back-btn"><i class="fas fa-chevron-left"></i></a>
+                <div>
+                    <div class="room-title"><i class="fas fa-network-wired"></i> Node: {{ room }}</div>
+                    <span class="user-tag"><i class="fas fa-user-ninja"></i> {{ name }}</span>
+                </div>
+            </div>
+            <div><i class="fas fa-shield-halved" style="color: var(--primary);"></i> SECURE CONNECTION ACTIVE</div>
+        </div>
 
-<div class="chat">
-    <div class="header">
-        Room: {{ room }} | User: {{ name }}
+        <div class="settings-bar">
+            <span style="font-size: 12px; color: var(--primary); letter-spacing: 1px;">LIVE DECRYPTION SETTINGS:</span>
+            <select id="algoSelect" class="custom-input">
+                <option value="AES" {{ 'selected' if algo == 'AES' else '' }}>AES-128</option>
+                <option value="Caesar" {{ 'selected' if algo == 'Caesar' else '' }}>Caesar Cipher</option>
+                <option value="Affine" {{ 'selected' if algo == 'Affine' else '' }}>Affine Cipher</option>
+                <option value="RailFence" {{ 'selected' if algo == 'RailFence' else '' }}>Rail Fence</option>
+                <option value="RowTransposition" {{ 'selected' if algo == 'RowTransposition' else '' }}>Row Transposition</option>
+                <option value="Playfair" {{ 'selected' if algo == 'Playfair' else '' }}>Playfair</option>
+            </select>
+            <input type="text" id="keyInput" class="custom-input" value="{{ key }}" placeholder="Update Key to Decrypt...">
+        </div>
+
+        <div class="messages-area" id="messagesContainer"></div>
+
+        <div class="input-area">
+            <input type="text" id="messageInput" class="custom-input" placeholder="Type encrypted transmission..." autocomplete="off">
+            <button class="send-btn" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+        </div>
     </div>
 
-    <div id="chatBox" class="messages"></div>
+    <script>
+        const socket = io();
+        let name = "{{ name }}"; let room = "{{ room }}";
+        let currentAlgo = "{{ algo }}"; let currentKey = "{{ key }}";
 
-    <div class="input">
-        <input id="message" placeholder="Type message">
-        <button onclick="sendMessage()">Send</button>
-    </div>
-</div>
+        document.getElementById('algoSelect').addEventListener('change', function() { currentAlgo = this.value; });
+        document.getElementById('keyInput').addEventListener('input', function() { currentKey = this.value; });
 
-<script>
-var socket = io();
+        socket.emit("join", {name: name, room: room});
 
-let name = "{{ name }}";
-let room = "{{ room }}";
-let algo = "{{ algo }}";
-let key = "{{ key }}";
+        socket.on("status", function(data) {
+            const div = document.createElement('div'); div.className = 'sys-msg';
+            div.innerHTML = `<i class="fas fa-info-circle"></i> ${data.msg}`;
+            document.getElementById('messagesContainer').appendChild(div);
+            scrollToBottom();
+        });
 
-socket.emit("join", {name: name, room: room});
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const msg = input.value.trim();
+            if (!msg) return;
 
-function sendMessage() {
-    let msg = document.getElementById("message").value;
+            socket.emit("send_message", {
+                name: name, room: room, message: msg, algo: currentAlgo, key: currentKey
+            });
+            input.value = ''; input.focus();
+        }
 
-    socket.emit("send_message", {
-        name: name,
-        room: room,
-        message: msg,
-        algo: algo,
-        key: key,
-        receiver_algo: algo,
-        receiver_key: key
-    });
-}
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }
+        });
 
-socket.on("receive_message", function(data) {
-    let div = document.createElement("div");
-    div.classList.add("msg");
+        socket.on("receive_message", function(data) {
+            const container = document.getElementById('messagesContainer');
+            const div = document.createElement('div');
+            const isMe = data.name === name;
+            div.className = `message ${isMe ? 'me' : 'other'}`;
 
-    if (data.name === name) {
-        div.classList.add("me");
-    } else {
-        div.classList.add("other");
-    }
+            let displayMsg = ''; let bubbleClass = ''; let iconHtml = '';
 
-    let text = data.decrypted
-        ? "🔓 " + data.decrypted
-        : "🔒 " + data.cipher;
+            if (isMe) {
+                displayMsg = data.original_msg;
+                bubbleClass = '';
+                iconHtml = `<span><i class="fas fa-lock"></i> Sent via ${data.sender_algo}</span>`;
+            } else {
+                // THE MAGIC LOGIC: Check if keys match
+                if (data.sender_algo === currentAlgo && data.sender_key === currentKey) {
+                    displayMsg = data.original_msg;
+                    bubbleClass = 'plain';
+                    iconHtml = `<span class="status-icon success"><i class="fas fa-unlock"></i> Decrypted (${data.sender_algo})</span>`;
+                } else {
+                    displayMsg = data.cipher;
+                    bubbleClass = 'cipher';
+                    iconHtml = `<span class="status-icon danger"><i class="fas fa-bug"></i> Encrypted (Key Mismatch)</span>`;
+                }
+            }
 
-    div.innerHTML = `<b>${data.name}:</b> ${text}`;
-    document.getElementById("chatBox").appendChild(div);
-});
-</script>
+            div.innerHTML = `
+                ${!isMe ? `<div class="msg-info" style="margin-bottom:5px; margin-top:0;">${data.name}</div>` : ''}
+                <div class="msg-bubble ${bubbleClass}">${escapeHtml(displayMsg)}</div>
+                <div class="msg-info">${iconHtml}</div>
+            `;
+            container.appendChild(div);
+            scrollToBottom();
+        });
 
+        function scrollToBottom() {
+            const el = document.getElementById('messagesContainer');
+            el.scrollTop = el.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div'); div.textContent = text; return div.innerHTML;
+        }
+    </script>
 </body>
 </html>

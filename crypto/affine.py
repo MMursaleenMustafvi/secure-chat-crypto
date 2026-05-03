@@ -1,8 +1,7 @@
 def mod_inverse(a, m):
     for i in range(m):
-        if (a * i) % m == 1:
-            return i
-    return None
+        if (a * i) % m == 1: return i
+    return 1 # Fallback to prevent crashes
 
 def encrypt(text, a, b):
     result = ""
@@ -10,8 +9,7 @@ def encrypt(text, a, b):
         if c.isalpha():
             x = ord(c.upper()) - 65
             result += chr((a*x + b) % 26 + 65)
-        else:
-            result += c
+        else: result += c
     return result
 
 def decrypt(text, a, b):
@@ -21,6 +19,5 @@ def decrypt(text, a, b):
         if c.isalpha():
             x = ord(c.upper()) - 65
             result += chr((a_inv*(x-b)) % 26 + 65)
-        else:
-            result += c
+        else: result += c
     return result
