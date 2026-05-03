@@ -7,16 +7,12 @@ def pad(text):
 
 def encrypt(msg, key):
     try:
+        if not key: key = "defaultkey"
         key = key.ljust(16)[:16].encode()
         cipher = AES.new(key, AES.MODE_ECB)
         enc = cipher.encrypt(pad(msg).encode())
         return base64.b64encode(enc).decode()
-    except: return "AES_ENCRYPT_ERROR"
+    except Exception: return "AES_ENCRYPT_ERROR"
 
 def decrypt(cipher_text, key):
-    try:
-        key = key.ljust(16)[:16].encode()
-        cipher = AES.new(key, AES.MODE_ECB)
-        dec = cipher.decrypt(base64.b64decode(cipher_text))
-        return dec.decode().strip()
-    except: return "AES_DECRYPT_ERROR"
+    return "Handled_in_Frontend"

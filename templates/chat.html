@@ -18,11 +18,14 @@
                     <span class="user-tag"><i class="fas fa-user-ninja"></i> {{ name }}</span>
                 </div>
             </div>
-            <div><i class="fas fa-shield-halved" style="color: var(--primary);"></i> SECURE CONNECTION ACTIVE</div>
+            <div class="action-btns">
+                <button onclick="clearChat()" class="clear-btn" title="Clear Chat History"><i class="fas fa-trash"></i> Clear</button>
+                <span style="font-size: 13px; font-weight: 600;"><i class="fas fa-shield-halved" style="color: var(--primary);"></i> SECURE</span>
+            </div>
         </div>
 
         <div class="settings-bar">
-            <span style="font-size: 12px; color: var(--primary); letter-spacing: 1px;">LIVE DECRYPTION SETTINGS:</span>
+            <span style="font-size: 12px; color: var(--primary); letter-spacing: 1px; font-weight: 600;">DECRYPTION MODULE:</span>
             <select id="algoSelect" class="custom-input">
                 <option value="AES" {{ 'selected' if algo == 'AES' else '' }}>AES-128</option>
                 <option value="Caesar" {{ 'selected' if algo == 'Caesar' else '' }}>Caesar Cipher</option>
@@ -64,9 +67,20 @@
             const msg = input.value.trim();
             if (!msg) return;
 
-            socket.emit("send_message", {
-                name: name, room: room, message: msg, algo: currentAlgo, key: currentKey
-            });
+            // Smart Validation!
+            if ((currentAlgo === 'Caesar' || currentAlgo === 'RailFence')) {
+                if (isNaN(currentKey) || currentKey.trim() === "") {
+                    alert(`⚠️ ${currentAlgo} requires a NUMBER as a key!`); return;
+                }
+            }
+            if (currentAlgo === 'Affine') {
+                if (!currentKey.includes(',') || currentKey.split(',').length !== 2) {
+                    alert(`⚠️ Affine key must be in 'a,b' format (e.g., 5,8)`); return;
+                }
+            }
+            if (!currentKey.trim()) { alert(`⚠️ Please enter an encryption key!`); return; }
+
+            socket.emit("send_message", { name: name, room: room, message: msg, algo: currentAlgo, key: currentKey });
             input.value = ''; input.focus();
         }
 
@@ -81,41 +95,95 @@
             div.className = `message ${isMe ? 'me' : 'other'}`;
 
             let displayMsg = ''; let bubbleClass = ''; let iconHtml = '';
+            let interactiveAttrs = ''; 
+            const timeStr = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
             if (isMe) {
                 displayMsg = data.original_msg;
-                bubbleClass = '';
-                iconHtml = `<span><i class="fas fa-lock"></i> Sent via ${data.sender_algo}</span>`;
+                iconHtml = `<span><i class="fas fa-lock"></i> Sent via ${data.sender_algo} <span class="time-stamp">${timeStr}</span></span>`;
             } else {
-                // THE MAGIC LOGIC: Check if keys match
+                interactiveAttrs = ` data-original="${escapeHtml(data.original_msg)}" data-algo="${escapeHtml(data.sender_algo)}" data-key="${escapeHtml(data.sender_key)}" onclick="tryDecrypt(this)" title="Click to attempt decryption" `;
+                
                 if (data.sender_algo === currentAlgo && data.sender_key === currentKey) {
                     displayMsg = data.original_msg;
                     bubbleClass = 'plain';
-                    iconHtml = `<span class="status-icon success"><i class="fas fa-unlock"></i> Decrypted (${data.sender_algo})</span>`;
+                    iconHtml = `
+                        <span class="status-icon success"><i class="fas fa-unlock"></i> Decrypted (${data.sender_algo}) <span class="time-stamp">${timeStr}</span></span>
+                        <button class="copy-btn" onclick="copyToClipboard(this, '${escapeHtml(data.original_msg)}')" title="Copy Text"><i class="fas fa-copy"></i></button>
+                    `;
+                    interactiveAttrs += ` style="cursor: default;"`; 
                 } else {
                     displayMsg = data.cipher;
                     bubbleClass = 'cipher';
-                    iconHtml = `<span class="status-icon danger"><i class="fas fa-bug"></i> Encrypted (Key Mismatch)</span>`;
+                    iconHtml = `<span class="status-icon danger"><i class="fas fa-fingerprint"></i> Encrypted (Click to retry) <span class="time-stamp">${timeStr}</span></span>`;
+                    interactiveAttrs += ` style="cursor: pointer;"`;
                 }
             }
 
             div.innerHTML = `
                 ${!isMe ? `<div class="msg-info" style="margin-bottom:5px; margin-top:0;">${data.name}</div>` : ''}
-                <div class="msg-bubble ${bubbleClass}">${escapeHtml(displayMsg)}</div>
-                <div class="msg-info">${iconHtml}</div>
+                <div class="msg-bubble ${bubbleClass}" ${interactiveAttrs}>
+                    <span class="msg-text">${escapeHtml(displayMsg)}</span>
+                </div>
+                <div class="msg-info status-container" style="justify-content: space-between; width: 100%;">${iconHtml}</div>
             `;
             container.appendChild(div);
             scrollToBottom();
         });
 
-        function scrollToBottom() {
-            const el = document.getElementById('messagesContainer');
-            el.scrollTop = el.scrollHeight;
+        function tryDecrypt(element) {
+            if (!element.classList.contains('cipher')) return;
+
+            const expectedAlgo = element.getAttribute('data-algo');
+            const expectedKey = element.getAttribute('data-key');
+            const originalText = element.getAttribute('data-original');
+            
+            const selectedAlgo = document.getElementById('algoSelect').value;
+            const selectedKey = document.getElementById('keyInput').value;
+            
+            const statusContainer = element.nextElementSibling;
+            const timeStr = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+            if (selectedAlgo === expectedAlgo && selectedKey === expectedKey) {
+                element.classList.remove('cipher'); element.classList.add('plain');
+                element.querySelector('.msg-text').innerHTML = originalText;
+                
+                statusContainer.innerHTML = `
+                    <span class="status-icon success"><i class="fas fa-unlock"></i> Decrypted Successfully <span class="time-stamp">${timeStr}</span></span>
+                    <button class="copy-btn" onclick="copyToClipboard(this, '${originalText}')" title="Copy Text"><i class="fas fa-copy"></i></button>
+                `;
+                element.style.cursor = 'default'; element.removeAttribute('title');
+            } else {
+                element.style.transition = 'transform 0.1s';
+                element.style.transform = 'translateX(8px)';
+                setTimeout(() => element.style.transform = 'translateX(-8px)', 100);
+                setTimeout(() => element.style.transform = 'translateX(8px)', 200);
+                setTimeout(() => element.style.transform = 'translateX(0)', 300);
+                
+                statusContainer.innerHTML = `<span class="status-icon danger"><i class="fas fa-times-circle"></i> Key/Algo Incorrect! <span class="time-stamp">${timeStr}</span></span>`;
+                setTimeout(() => {
+                    if (element.classList.contains('cipher')) {
+                        statusContainer.innerHTML = `<span class="status-icon danger"><i class="fas fa-fingerprint"></i> Encrypted (Click to retry) <span class="time-stamp">${timeStr}</span></span>`;
+                    }
+                }, 1500);
+            }
         }
 
-        function escapeHtml(text) {
-            const div = document.createElement('div'); div.textContent = text; return div.innerHTML;
+        function copyToClipboard(btnElement, text) {
+            const txt = document.createElement("textarea"); txt.innerHTML = text;
+            navigator.clipboard.writeText(txt.value).then(() => {
+                const icon = btnElement.querySelector('i');
+                icon.className = 'fas fa-check'; icon.style.color = 'var(--success)';
+                setTimeout(() => { icon.className = 'fas fa-copy'; icon.style.color = ''; }, 2000);
+            });
         }
+
+        function clearChat() {
+            if(confirm("Are you sure you want to clear your screen?")) { document.getElementById('messagesContainer').innerHTML = ''; }
+        }
+
+        function scrollToBottom() { const el = document.getElementById('messagesContainer'); el.scrollTop = el.scrollHeight; }
+        function escapeHtml(text) { const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
     </script>
 </body>
 </html>

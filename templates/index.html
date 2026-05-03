@@ -19,18 +19,18 @@
                 <input type="text" name="name" class="custom-input" required autocomplete="off" placeholder="e.g. Neo">
             </div>
             <div class="input-group">
-                <label>Server Node (Room)</label>
+                <label>Server Node (Room ID)</label>
                 <input type="text" name="room" class="custom-input" required autocomplete="off" placeholder="e.g. Matrix">
             </div>
             <div class="input-group">
                 <label>Protocol (Algorithm)</label>
                 <select name="algo" class="custom-input">
-                    <option value="AES">AES-128</option>
-                    <option value="Caesar">Caesar Cipher</option>
-                    <option value="Affine">Affine Cipher</option>
-                    <option value="RailFence">Rail Fence</option>
-                    <option value="RowTransposition">Row Transposition</option>
-                    <option value="Playfair">Playfair</option>
+                    <option value="AES">AES-128 (Any text key)</option>
+                    <option value="Caesar">Caesar Cipher (Number key)</option>
+                    <option value="Affine">Affine Cipher (Format: a,b)</option>
+                    <option value="RailFence">Rail Fence (Number key)</option>
+                    <option value="RowTransposition">Row Transposition (Text key)</option>
+                    <option value="Playfair">Playfair (Text key)</option>
                 </select>
             </div>
             <div class="input-group">
