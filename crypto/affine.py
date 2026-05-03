@@ -6,16 +6,21 @@ def mod_inverse(a, m):
 
 def encrypt(text, a, b):
     result = ""
-    for char in text:
-        if char.isalpha():
-            x = ord(char) - 65
-            result += chr((a * x + b) % 26 + 65)
+    for c in text:
+        if c.isalpha():
+            x = ord(c.upper()) - 65
+            result += chr((a*x + b) % 26 + 65)
+        else:
+            result += c
     return result
 
 def decrypt(text, a, b):
     a_inv = mod_inverse(a, 26)
     result = ""
-    for char in text:
-        x = ord(char) - 65
-        result += chr((a_inv * (x - b)) % 26 + 65)
+    for c in text:
+        if c.isalpha():
+            x = ord(c.upper()) - 65
+            result += chr((a_inv*(x-b)) % 26 + 65)
+        else:
+            result += c
     return result

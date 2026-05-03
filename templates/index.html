@@ -2,54 +2,45 @@
 <html>
 <head>
     <title>Secure Chat Crypto</title>
-    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 
-<div class="container">
+<h1>🔐 Secure Crypto System</h1>
 
-    <h1>🔐 Secure Chat Crypto System</h1>
+<form method="POST">
 
-    <form method="POST">
+    <input type="text" name="message" placeholder="Enter message" required><br><br>
 
-        <label>Message:</label><br>
-        <input type="text" name="message" placeholder="Enter message" required><br><br>
+    <select name="algorithm" required>
+        <option value="AES">AES</option>
+        <option value="Caesar">Caesar</option>
+        <option value="Affine">Affine</option>
+        <option value="RailFence">Rail Fence</option>
+        <option value="RowTransposition">Row Transposition</option>
+        <option value="Playfair">Playfair</option>
+    </select><br><br>
 
-        <label>Select Algorithm:</label><br>
-        <select name="algorithm" required>
-            <option value="">-- Select --</option>
-            <option value="AES">AES</option>
-            <option value="Caesar">Caesar Cipher</option>
-            <option value="Affine">Affine Cipher</option>
-            <option value="RailFence">Rail Fence</option>
-            <option value="RowTransposition">Row Transposition</option>
-            <option value="Playfair">Playfair Cipher</option>
-        </select><br><br>
+    <input type="text" name="key" placeholder="Key (e.g. 3 or 5,8)" required><br><br>
 
-        <label>Key:</label><br>
-        <input type="text" name="key" placeholder="Examples: 3 | 5,8 | keyword" required><br><br>
+    <button type="submit">Encrypt & Decrypt</button>
 
-        <button type="submit">Encrypt & Decrypt</button>
+</form>
 
-    </form>
+<hr>
 
-    <hr>
+{% if error %}
+<p style="color:red;">{{ error }}</p>
+{% endif %}
 
-    {% if error %}
-        <p style="color:red;"><b>{{ error }}</b></p>
-    {% endif %}
+<h3>🔒 Cipher:</h3>
+<p>{{ cipher }}</p>
 
-    {% if cipher %}
-        <h3>🔒 Cipher Text:</h3>
-        <div class="box">{{ cipher }}</div>
-    {% endif %}
+<h3>🔓 Decrypted:</h3>
+<p>{{ result }}</p>
 
-    {% if result %}
-        <h3>🔓 Decrypted Text:</h3>
-        <div class="box">{{ result }}</div>
-    {% endif %}
+<hr>
 
-</div>
+<a href="/chat">👉 Go to Live Chat</a>
 
 </body>
 </html>

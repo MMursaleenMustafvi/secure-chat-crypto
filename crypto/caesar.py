@@ -1,10 +1,10 @@
 def encrypt(text, shift):
     result = ""
-    for char in text:
-        if char.isalpha():
-            result += chr((ord(char.upper()) + shift - 65) % 26 + 65)
+    for c in text:
+        if c.isalpha():
+            result += chr((ord(c.upper()) + shift - 65) % 26 + 65)
         else:
-            result += char
+            result += c
     return result
 
 def decrypt(text, shift):

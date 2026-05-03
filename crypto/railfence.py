@@ -1,43 +1,39 @@
 def encrypt(text, rails):
     fence = [[] for _ in range(rails)]
-    rail = 0
-    direction = 1
+    rail, step = 0, 1
 
-    for char in text:
-        fence[rail].append(char)
-        rail += direction
+    for c in text:
+        fence[rail].append(c)
+        rail += step
+        if rail == 0 or rail == rails-1:
+            step *= -1
 
-        if rail == 0 or rail == rails - 1:
-            direction *= -1
-
-    return ''.join([''.join(row) for row in fence])
+    return ''.join(''.join(row) for row in fence)
 
 
 def decrypt(cipher, rails):
     pattern = [[] for _ in range(rails)]
-    rail = 0
-    direction = 1
+    rail, step = 0, 1
 
     for _ in cipher:
         pattern[rail].append('*')
-        rail += direction
-        if rail == 0 or rail == rails - 1:
-            direction *= -1
+        rail += step
+        if rail == 0 or rail == rails-1:
+            step *= -1
 
-    index = 0
-    for i in range(rails):
-        for j in range(len(pattern[i])):
-            pattern[i][j] = cipher[index]
-            index += 1
+    idx = 0
+    for r in pattern:
+        for i in range(len(r)):
+            r[i] = cipher[idx]
+            idx += 1
 
     result = ""
-    rail = 0
-    direction = 1
+    rail, step = 0, 1
 
     for _ in cipher:
         result += pattern[rail].pop(0)
-        rail += direction
-        if rail == 0 or rail == rails - 1:
-            direction *= -1
+        rail += step
+        if rail == 0 or rail == rails-1:
+            step *= -1
 
     return result

@@ -1,55 +1,69 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Live Secure Chat</title>
+    <title>Secure Chat</title>
     <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
 </head>
 <body>
 
-<h2>🔐 Live Secure Chat</h2>
+<h1>🔐 Smart Secure Chat</h1>
 
-<input id="message" placeholder="Message"><br><br>
-
-<select id="algorithm">
+<h3>Your Settings</h3>
+<select id="myAlgo">
     <option value="AES">AES</option>
     <option value="Caesar">Caesar</option>
     <option value="Affine">Affine</option>
+    <option value="RailFence">Rail Fence</option>
+    <option value="RowTransposition">Row Transposition</option>
+    <option value="Playfair">Playfair</option>
 </select><br><br>
 
-<input id="key" placeholder="Key"><br><br>
+<input id="myKey" placeholder="Your key"><br><br>
+
+<hr>
+
+<h3>Send Message</h3>
+<input id="message" placeholder="Type message"><br><br>
+
+<h4>Sender Settings</h4>
+
+<select id="senderAlgo">
+    <option value="AES">AES</option>
+    <option value="Caesar">Caesar</option>
+    <option value="Affine">Affine</option>
+    <option value="RailFence">Rail Fence</option>
+    <option value="RowTransposition">Row Transposition</option>
+    <option value="Playfair">Playfair</option>
+</select><br><br>
+
+<input id="senderKey" placeholder="Sender key"><br><br>
 
 <button onclick="sendMessage()">Send</button>
 
 <hr>
 
+<h3>Chat</h3>
 <div id="chatBox"></div>
 
 <script>
     var socket = io();
 
     function sendMessage() {
-        let message = document.getElementById("message").value;
-        let algorithm = document.getElementById("algorithm").value;
-        let key = document.getElementById("key").value;
-
         socket.emit("send_message", {
-            message: message,
-            algorithm: algorithm,
-            key: key
+            message: document.getElementById("message").value,
+            sender_algo: document.getElementById("senderAlgo").value,
+            sender_key: document.getElementById("senderKey").value,
+            receiver_algo: document.getElementById("myAlgo").value,
+            receiver_key: document.getElementById("myKey").value
         });
     }
 
     socket.on("receive_message", function(data) {
-        let box = document.getElementById("chatBox");
+        let text = data.decrypted
+            ? "🔓 Plain: " + data.decrypted
+            : "🔒 Cipher: " + data.cipher;
 
-        box.innerHTML += `
-            <p>
-                🔒 Cipher: ${data.cipher} <br>
-                🔓 Decrypted: ${data.result} <br>
-                📌 Algo: ${data.algorithm}
-            </p>
-            <hr>
-        `;
+        document.getElementById("chatBox").innerHTML += `<p>${text}</p>`;
     });
 </script>
 

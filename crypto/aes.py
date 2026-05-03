@@ -6,14 +6,14 @@ def pad(text):
         text += ' '
     return text
 
-def encrypt(message, key):
+def encrypt(msg, key):
     key = key.ljust(16)[:16].encode()
     cipher = AES.new(key, AES.MODE_ECB)
-    encrypted = cipher.encrypt(pad(message).encode())
-    return base64.b64encode(encrypted).decode()
+    enc = cipher.encrypt(pad(msg).encode())
+    return base64.b64encode(enc).decode()
 
 def decrypt(cipher_text, key):
     key = key.ljust(16)[:16].encode()
     cipher = AES.new(key, AES.MODE_ECB)
-    decrypted = cipher.decrypt(base64.b64decode(cipher_text))
-    return decrypted.decode().strip()
+    dec = cipher.decrypt(base64.b64decode(cipher_text))
+    return dec.decode().strip()
