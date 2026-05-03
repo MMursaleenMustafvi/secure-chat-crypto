@@ -1,70 +1,105 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Secure Chat</title>
+    <title>Chat Room</title>
     <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+
+    <style>
+        body { font-family: Arial; background: #ece5dd; }
+
+        .chat {
+            width: 400px;
+            margin: auto;
+            background: white;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: #075e54;
+            color: white;
+            padding: 10px;
+        }
+
+        .messages {
+            flex: 1;
+            padding: 10px;
+            overflow-y: scroll;
+        }
+
+        .msg {
+            margin: 5px;
+            padding: 8px;
+            border-radius: 10px;
+            max-width: 70%;
+        }
+
+        .me { background: #dcf8c6; align-self: flex-end; }
+        .other { background: #fff; }
+
+        .input { display: flex; }
+        input { flex: 1; padding: 10px; }
+        button { padding: 10px; }
+    </style>
 </head>
+
 <body>
 
-<h1>🔐 Smart Secure Chat</h1>
+<div class="chat">
+    <div class="header">
+        Room: {{ room }} | User: {{ name }}
+    </div>
 
-<h3>Your Settings</h3>
-<select id="myAlgo">
-    <option value="AES">AES</option>
-    <option value="Caesar">Caesar</option>
-    <option value="Affine">Affine</option>
-    <option value="RailFence">Rail Fence</option>
-    <option value="RowTransposition">Row Transposition</option>
-    <option value="Playfair">Playfair</option>
-</select><br><br>
+    <div id="chatBox" class="messages"></div>
 
-<input id="myKey" placeholder="Your key"><br><br>
-
-<hr>
-
-<h3>Send Message</h3>
-<input id="message" placeholder="Type message"><br><br>
-
-<h4>Sender Settings</h4>
-
-<select id="senderAlgo">
-    <option value="AES">AES</option>
-    <option value="Caesar">Caesar</option>
-    <option value="Affine">Affine</option>
-    <option value="RailFence">Rail Fence</option>
-    <option value="RowTransposition">Row Transposition</option>
-    <option value="Playfair">Playfair</option>
-</select><br><br>
-
-<input id="senderKey" placeholder="Sender key"><br><br>
-
-<button onclick="sendMessage()">Send</button>
-
-<hr>
-
-<h3>Chat</h3>
-<div id="chatBox"></div>
+    <div class="input">
+        <input id="message" placeholder="Type message">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
 
 <script>
-    var socket = io();
+var socket = io();
 
-    function sendMessage() {
-        socket.emit("send_message", {
-            message: document.getElementById("message").value,
-            sender_algo: document.getElementById("senderAlgo").value,
-            sender_key: document.getElementById("senderKey").value,
-            receiver_algo: document.getElementById("myAlgo").value,
-            receiver_key: document.getElementById("myKey").value
-        });
+let name = "{{ name }}";
+let room = "{{ room }}";
+let algo = "{{ algo }}";
+let key = "{{ key }}";
+
+socket.emit("join", {name: name, room: room});
+
+function sendMessage() {
+    let msg = document.getElementById("message").value;
+
+    socket.emit("send_message", {
+        name: name,
+        room: room,
+        message: msg,
+        algo: algo,
+        key: key,
+        receiver_algo: algo,
+        receiver_key: key
+    });
+}
+
+socket.on("receive_message", function(data) {
+    let div = document.createElement("div");
+    div.classList.add("msg");
+
+    if (data.name === name) {
+        div.classList.add("me");
+    } else {
+        div.classList.add("other");
     }
 
-    socket.on("receive_message", function(data) {
-        let text = data.decrypted
-            ? "🔓 Plain: " + data.decrypted
-            : "🔒 Cipher: " + data.cipher;
+    let text = data.decrypted
+        ? "🔓 " + data.decrypted
+        : "🔒 " + data.cipher;
 
-        document.getElementById("chatBox").innerHTML += `<p>${text}</p>`;
-    });
+    div.innerHTML = `<b>${data.name}:</b> ${text}`;
+    document.getElementById("chatBox").appendChild(div);
+});
 </script>
 
 </body>
