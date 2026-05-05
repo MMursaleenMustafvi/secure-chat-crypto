@@ -46,7 +46,7 @@ pip install flask flask-socketio pycryptodome
 python app.py
 ```
 
-Visit: `http://localhost:5000`
+Visit: `https://secure-chat-hfnw.onrender.com`
 
 ## 📖 How to Use
 
