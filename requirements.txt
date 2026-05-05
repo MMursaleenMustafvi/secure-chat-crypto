@@ -2,3 +2,5 @@ Flask==2.3.0
 flask-socketio==5.3.0
 pycryptodome==3.18.0
 python-socketio==5.9.0
+gunicorn==21.2.0 
+eventlet==0.33.3   
