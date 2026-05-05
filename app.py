@@ -5,7 +5,7 @@ from crypto import caesar, affine, aes, railfence, row_transposition, playfair
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'super-secret-pro-key'
 # socketio = SocketIO(app)
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 def encrypt_message(msg, algo, key):
     try:
