@@ -1,17 +1,17 @@
-# 🔐 SecureChat - Professional Encrypted Messaging System
+#  SecureChat - Professional Encrypted Messaging System
 
 A premium end-to-end encrypted chat application with real-time algorithm switching and modern UI.
 
-## ✨ Features
+##  Features
 
-### 🎨 Premium UI/UX
+###  Premium UI/UX
 - Modern gradient design with glassmorphism effects
 - Smooth animations and transitions
 - Fully responsive mobile-first design
 - Professional color scheme
 - Clean and intuitive interface
 
-### 🔒 Encryption Algorithms
+###  Encryption Algorithms
 - **AES** (Advanced Encryption Standard)
 - **Caesar Cipher**
 - **Affine Cipher**
@@ -19,7 +19,7 @@ A premium end-to-end encrypted chat application with real-time algorithm switchi
 - **Row Transposition**
 - **Playfair Cipher**
 
-### 🚀 Advanced Features
+###  Advanced Features
 - **Real-time Algorithm Switching**: Change encryption during chat
 - **Live Key Updates**: Modify encryption keys on the fly
 - **Room-based Chat**: Multiple isolated chat rooms
@@ -27,7 +27,7 @@ A premium end-to-end encrypted chat application with real-time algorithm switchi
 - **Auto-scroll**: Smooth message feed updates
 - **Enter to Send**: Quick message sending
 
-## 📦 Installation
+##  Installation
 
 ### Prerequisites
 ```bash
@@ -40,7 +40,7 @@ pip
 pip install flask flask-socketio pycryptodome
 ```
 
-## 🚀 Running the Application
+##  Running the Application
 
 ```bash
 python app.py
@@ -48,7 +48,7 @@ python app.py
 
 Visit: `https://secure-chat-hfnw.onrender.com`
 
-## 📖 How to Use
+##  How to Use
 
 ### 1. Join a Room
 - Enter your name
@@ -74,7 +74,7 @@ Visit: `https://secure-chat-hfnw.onrender.com`
 | Row Transposition | Keyword | `SECRET` |
 | Playfair | Keyword | `MONARCHY` |
 
-## 🏗️ Project Structure
+##  Project Structure
 
 ```
 SecureChat/
@@ -93,7 +93,7 @@ SecureChat/
 └── README.md
 ```
 
-## 🔐 Security Notes
+##  Security Notes
 
 ⚠️ **Important**: This is a demonstration application. For production use:
 - Implement proper key exchange mechanisms
@@ -103,7 +103,7 @@ SecureChat/
 - Use stronger encryption modes (not ECB for AES)
 - Add message integrity verification
 
-## 🎓 Educational Purpose
+##  Educational Purpose
 
 This application demonstrates:
 - Classical and modern cryptography
@@ -112,16 +112,16 @@ This application demonstrates:
 - Encryption algorithm implementation
 - Modern UI/UX design principles
 
-## 👨‍💻 Developers
+## 👨‍💻Developers
 
 **Muhammad Mursaleen Mustafvi**  
-**Muhammad Bin Talib**
+**Muhammad Bin Talib Hussain**
 
 ## 📄 License
 
 Educational and demonstration purposes only.
 
-## 🙏 Acknowledgments
+## 🙏Acknowledgments
 
 Built with:
 - Flask & Flask-SocketIO
